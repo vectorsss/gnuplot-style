@@ -17,7 +17,7 @@ import gnuplot_style as gp  # noqa: E402
 
 def test_import():
     """Test that the package can be imported."""
-    assert gp.__version__ == "0.1.0"
+    assert gp.__version__ == "0.1.1"
 
 
 def test_colors_constant():
