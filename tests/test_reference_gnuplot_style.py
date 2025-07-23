@@ -23,6 +23,7 @@ import gnuplot_style as gp  # noqa: E402
 def create_reference():
     """Create comprehensive reference figure showing all gnuplot_style features."""
 
+    gp.use()
     # Create figure with proper layout
     fig = plt.figure(figsize=(20, 28))
     gs = gridspec.GridSpec(
@@ -48,10 +49,10 @@ def create_reference():
     # Row 1: Line styles (without markers)
     # ============================================================================
     # Lines only (black, no markers)
+    gp.use("l")
     ax = fig.add_subplot(gs[0, 0])
     ax.set_title('gp.use("l") - Lines Only', fontweight="bold", fontsize=14)
-    gp.use("l")
-    ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
+    # ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
     for i in range(6):
         y = np.sin(x + i * 0.5) * (0.8 - i * 0.15)
         ax.plot(x, y, linewidth=2, color="black", label=f"Data {i+1}")

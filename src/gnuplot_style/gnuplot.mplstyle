@@ -3,7 +3,7 @@
 
 # Figure properties
 figure.figsize: 6.4, 4.8
-figure.dpi: 300
+figure.dpi: 150
 figure.facecolor: white
 figure.edgecolor: black
 figure.autolayout: True

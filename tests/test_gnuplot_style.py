@@ -76,13 +76,14 @@ def test_mplstyle_loading():
     """Test that mplstyle file is loaded."""
     # Reset first
     plt.rcdefaults()
-    original_font = plt.rcParams["font.family"]
 
     # Apply style
     gp.use()
 
-    # Check that font changed (mplstyle sets serif)
-    assert plt.rcParams["font.family"] != original_font
+    # Check that mplstyle is loaded by verifying specific settings
+    assert plt.rcParams["font.family"] == ["sans-serif"]
+    assert plt.rcParams["figure.figsize"] == [6.4, 4.8]
+    assert plt.rcParams["figure.dpi"] == 150
 
 
 def test_apply_style_to_existing_axes():
