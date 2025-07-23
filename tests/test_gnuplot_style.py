@@ -150,19 +150,46 @@ def test_extended_cycle_mode():
     cycle = list(plt.rcParams["axes.prop_cycle"])
     assert len(cycle) == 72  # 8 colors × 9 lines
 
-    # Test color+marker extended mode (128 combinations)
+    # Test color+marker extended mode (136 combinations)
     gp.use("cm", cycle_mode="extended")
     cycle = list(plt.rcParams["axes.prop_cycle"])
-    assert len(cycle) == 128  # 8 colors × 16 markers
+    assert len(cycle) == 136  # 8 colors × 17 markers
 
-    # Test that first 16 have the same marker
+    # Test that first 8 have the same marker (empty string)
     for i in range(8):
-        assert cycle[i]["marker"] == gp.MARKERS[0]
+        assert cycle[i]["marker"] == gp.MARKERS[0]  # Empty string ""
     # Test that colors cycle within each marker group
     for i in range(8):
         assert cycle[i]["color"] == gp.COLORS[i]
         assert cycle[i + 8]["color"] == gp.COLORS[i]  # Colors repeat
-        assert cycle[i + 8]["marker"] == gp.MARKERS[1]  # Different marker
+        assert cycle[i + 8]["marker"] == gp.MARKERS[1]  # Different marker (.)
+
+
+def test_skip_no_marker():
+    """Test skip_no_marker functionality."""
+    # Test with marker style
+    gp.use("m", skip_no_marker=True)
+    cycle = list(plt.rcParams["axes.prop_cycle"])
+    assert len(cycle) == 16  # 17 markers - 1 (no symbol)
+    assert cycle[0]["marker"] == gp.MARKERS[1]  # Should start with dot
+
+    # Test with color+marker default mode
+    gp.use("cm", skip_no_marker=True)
+    cycle = list(plt.rcParams["axes.prop_cycle"])
+    assert len(cycle) == 8
+    assert cycle[0]["marker"] == gp.MARKERS[1]  # Should start with dot
+
+    # Test with color+marker extended mode
+    gp.use("cm", cycle_mode="extended", skip_no_marker=True)
+    cycle = list(plt.rcParams["axes.prop_cycle"])
+    assert len(cycle) == 128  # 8 colors × 16 markers (17 - 1)
+    assert cycle[0]["marker"] == gp.MARKERS[1]  # Should start with dot
+
+    # Test with all style
+    gp.use("all", skip_no_marker=True)
+    cycle = list(plt.rcParams["axes.prop_cycle"])
+    assert len(cycle) == 16
+    assert cycle[0]["marker"] == gp.MARKERS[1]  # Should start with dot
 
 
 def test_default_vs_extended_visual():
@@ -211,7 +238,7 @@ def test_default_vs_extended_visual():
     ax = axes[1, 1]
     gp.use("cm", cycle_mode="extended")
     ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
-    ax.set_title("Color+Marker Extended (128 unique)")
+    ax.set_title("Color+Marker Extended (136 unique)")
     for i in range(n_lines):
         y = np.sin(x_sparse + i * 0.2) * (0.9 - i * 0.02)
         ax.plot(x_sparse, y, linewidth=1, markersize=6, label=f"{i+1}")

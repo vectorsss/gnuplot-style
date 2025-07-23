@@ -96,8 +96,12 @@ def create_reference():
     # ============================================================================
     # Markers only (black, no lines)
     ax = fig.add_subplot(gs[1, 0])
-    ax.set_title('gp.use("m") - Markers Only', fontweight="bold", fontsize=14)
-    gp.use("m")
+    ax.set_title(
+        'gp.use("m", skip_no_marker=True) - Markers Only',
+        fontweight="bold",
+        fontsize=14,
+    )
+    gp.use("m", skip_no_marker=True)  # Skip marker 0 (no symbol) for visibility
     ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
     for i in range(6):
         y = np.sin(x + i * 0.5) * (0.8 - i * 0.15)
@@ -173,10 +177,10 @@ def create_reference():
 
     # Markers
     ax = fig.add_subplot(gs[2, 2])
-    ax.set_title("Markers (1-16)", fontsize=14, fontweight="bold")
+    ax.set_title("Markers (0-16)", fontsize=14, fontweight="bold")
     n_cols = 4
-    n_rows = 4
-    for i in range(16):
+    n_rows = 5  # Need 5 rows for 17 markers
+    for i in range(17):
         row = i // n_cols
         col = i % n_cols
         x = col * 1.5 + 0.75
@@ -185,19 +189,24 @@ def create_reference():
         marker = gp.MARKERS[i]
         fillstyle = gp.FILL_STYLES[i]
 
-        ax.plot(
-            x,
-            y,
-            marker=marker,
-            markersize=15,
-            markeredgecolor="black",
-            markerfacecolor="black" if fillstyle == "full" else "none",
-            markeredgewidth=2,
-            linestyle="none",
-        )
-        ax.text(x, y - 0.3, f"{i+1}", ha="center", fontsize=9)
+        if marker == " ":  # no symbol
+            # Draw a small line to indicate "line only"
+            # ax.plot([x - 0.3, x + 0.3], [y, y], color="black", linewidth=2)
+            ax.text(x, y - 0.5, f"{i} (no symbol)", ha="center", fontsize=8)
+        else:
+            ax.plot(
+                x,
+                y,
+                marker=marker,
+                markersize=15,
+                markeredgecolor="black",
+                markerfacecolor="black" if fillstyle == "full" else "none",
+                markeredgewidth=2,
+                linestyle="none",
+            )
+            ax.text(x, y - 0.5, f"{i}", ha="center", fontsize=9)
     ax.set_xlim(0, 6)
-    ax.set_ylim(0, 4)
+    ax.set_ylim(-0.5, 5)
     ax.axis("off")
 
     # ============================================================================
@@ -246,7 +255,7 @@ def create_reference():
     # Example 1: Scatter plot with Markers + Colors
     ax = fig.add_subplot(gs[4, 0])
     ax.set_title("Scatter Plot (Markers + Colors)", fontsize=12, fontweight="bold")
-    gp.use("cm")
+    gp.use("cm", skip_no_marker=True)  # Skip marker 0 (no symbol) for scatter plots
     ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
     np.random.seed(42)
     for i in range(6):

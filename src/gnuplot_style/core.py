@@ -19,7 +19,10 @@ from .constants import (
 
 
 def use(
-    style: str = "color", apply_mplstyle: bool = True, cycle_mode: str = "default"
+    style: str = "color",
+    apply_mplstyle: bool = True,
+    cycle_mode: str = "default",
+    skip_no_marker: bool = False,
 ) -> None:
     """Apply gnuplot style with a single command.
 
@@ -40,8 +43,10 @@ def use(
         - 'default': Standard cycling (8 for most, 16 for 'all')
         - 'extended': Extended cycling for more combinations
           - 'cl': 72 combinations (8 colors × 9 lines)
-          - 'cm': 128 combinations (8 colors × 16 markers)
+          - 'cm': 136 combinations (8 colors × 17 markers)
           - 'all': 16 combinations (same as default)
+    skip_no_marker : bool, optional
+        Whether to skip marker index 0 (no symbol) for scatter plots (default: False)
 
     Raises
     ------
@@ -72,12 +77,20 @@ def use(
 
     elif style == "marker":
         # Just markers - no connecting lines, pair element-wise
+        if skip_no_marker:
+            # Skip the first marker (no symbol)
+            markers_to_use = MARKERS[1:]
+            fills_to_use = FILL_STYLES[1:]
+        else:
+            markers_to_use = MARKERS
+            fills_to_use = FILL_STYLES
+
         plt.rc(
             "axes",
             prop_cycle=cycler(
-                marker=MARKERS,
-                fillstyle=FILL_STYLES,
-                linestyle=["none"] * len(MARKERS),
+                marker=markers_to_use,
+                fillstyle=fills_to_use,
+                linestyle=["none"] * len(markers_to_use),
             ),
         )
 
@@ -104,11 +117,12 @@ def use(
         # Create paired colors and markers
         if cycle_mode == "extended":
             # Extended mode: cycle through all combinations
-            # (8 colors × 16 markers = 128)
+            # (8 colors × 17 markers = 136, or 8 × 16 = 128 if skipping no marker)
             colors = []
             markers = []
             fills = []
-            for marker_idx in range(len(MARKERS)):
+            start_idx = 1 if skip_no_marker else 0
+            for marker_idx in range(start_idx, len(MARKERS)):
                 for color_idx in range(len(COLORS)):
                     colors.append(COLORS[color_idx])
                     markers.append(MARKERS[marker_idx])
@@ -118,26 +132,29 @@ def use(
             colors = []
             markers = []
             fills = []
+            start_idx = 1 if skip_no_marker else 0
             for i in range(8):
                 colors.append(COLORS[i % len(COLORS)])
-                markers.append(MARKERS[i % len(MARKERS)])
-                fills.append(FILL_STYLES[i % len(FILL_STYLES)])
+                marker_idx = (i + start_idx) % len(MARKERS)
+                markers.append(MARKERS[marker_idx])
+                fills.append(FILL_STYLES[marker_idx])
         plt.rc("axes", prop_cycle=cycler(color=colors, marker=markers, fillstyle=fills))
 
     elif style == "all":
         # All three combined - use 16 unique combinations
-        # First 8: colors 1-8 with markers 1-8
-        # Next 8: colors 1-8 with markers 9-16
+        # First 8: colors 1-8 with markers 1-8 (or 1-9 if skipping no marker)
+        # Next 8: colors 1-8 with markers 9-16 (or 9-17 if skipping no marker)
         colors = []
         lines = []
         markers = []
         fills = []
 
         # Create 16 combinations
+        start_idx = 1 if skip_no_marker else 0
         for i in range(16):
             color_idx = i % 8
             line_idx = i % len(LINE_STYLES)
-            marker_idx = i % len(MARKERS)
+            marker_idx = (i + start_idx) % len(MARKERS)
 
             colors.append(COLORS[color_idx])
             lines.append(LINE_STYLES[line_idx])

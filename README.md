@@ -127,7 +127,7 @@ For even more unique combinations, use `cycle_mode='extended'`:
 # 72 unique combinations (8 colors × 9 line styles)
 gp.use('cl', cycle_mode='extended')
 
-# 128 unique combinations (8 colors × 16 markers)
+# 136 unique combinations (8 colors × 17 markers)
 gp.use('cm', cycle_mode='extended')
 
 # Also works with convenience functions
@@ -136,6 +136,26 @@ gp.colors_markers(cycle_mode='extended')
 ```
 
 Extended mode cycles through all color combinations for each line/marker style before moving to the next, providing maximum visual distinction for complex plots.
+
+### Scatter Plots (NEW!)
+For scatter plots where line styles are not used, you can skip marker index 0 (no symbol) to ensure all data points are visible:
+
+```python
+# Skip the "no symbol" marker for scatter plots
+gp.use('cm', skip_no_marker=True)  # Starts from marker 1 (dot)
+gp.use('m', skip_no_marker=True)   # Markers only, no invisible first marker
+
+# Works with extended mode too
+gp.use('cm', cycle_mode='extended', skip_no_marker=True)
+
+# Then create scatter plots where all datasets are visible
+for i in range(8):
+    x = np.random.normal(i, 0.3, 50)
+    y = np.random.normal(i, 0.3, 50)
+    plt.plot(x, y, linestyle='none', markersize=8)
+```
+
+Without `skip_no_marker=True`, the first dataset would be invisible because gnuplot's marker 0 is "no symbol".
 
 ## Development
 

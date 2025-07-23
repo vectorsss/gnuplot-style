@@ -25,8 +25,9 @@ LINE_STYLES = [
     (0, (4, 4, 4, 12)),  # LT8: dash with gap
 ]
 
-# Gnuplot point types mapped to matplotlib markers (1-16 only)
+# Gnuplot point types mapped to matplotlib markers (0-16)
 MARKERS = [
+    " ",  # 0: no symbol
     ".",  # 1: point
     "+",  # 2: plus
     "x",  # 3: cross
@@ -45,24 +46,25 @@ MARKERS = [
     "p",  # 16: pentagon (filled)
 ]
 
-# Filled point types
+# Filled point types (matching MARKERS indices)
 FILL_STYLES = [
-    "full",
-    "none",
-    "none",
-    "none",
-    "none",
-    "full",
-    "none",
-    "full",
-    "none",
-    "full",
-    "none",
-    "full",
-    "none",
-    "full",
-    "none",
-    "full",
+    "none",  # 0: no symbol
+    "full",  # 1: point
+    "none",  # 2: plus
+    "none",  # 3: cross
+    "none",  # 4: star
+    "none",  # 5: square (open)
+    "full",  # 6: square (filled)
+    "none",  # 7: circle (open)
+    "full",  # 8: circle (filled)
+    "none",  # 9: triangle up (open)
+    "full",  # 10: triangle up (filled)
+    "none",  # 11: triangle down (open)
+    "full",  # 12: triangle down (filled)
+    "none",  # 13: diamond (open)
+    "full",  # 14: diamond (filled)
+    "none",  # 15: pentagon (open)
+    "full",  # 16: pentagon (filled)
 ]
 
 # Gnuplot pattern fills for histograms

@@ -13,9 +13,15 @@ def lines() -> None:
     use("line")
 
 
-def markers() -> None:
-    """Apply just gnuplot markers."""
-    use("marker")
+def markers(skip_no_marker: bool = False) -> None:
+    """Apply just gnuplot markers.
+
+    Parameters
+    ----------
+    skip_no_marker : bool, optional
+        Whether to skip marker index 0 (no symbol) for scatter plots
+    """
+    use("marker", skip_no_marker=skip_no_marker)
 
 
 def colors_lines(cycle_mode: str = "default") -> None:
@@ -29,23 +35,28 @@ def colors_lines(cycle_mode: str = "default") -> None:
     use("color+line", cycle_mode=cycle_mode)
 
 
-def colors_markers(cycle_mode: str = "default") -> None:
+def colors_markers(cycle_mode: str = "default", skip_no_marker: bool = False) -> None:
     """Apply gnuplot colors and markers.
 
     Parameters
     ----------
     cycle_mode : str, optional
-        'default' for 8 combinations, 'extended' for 128 combinations
+        'default' for 8 combinations, 'extended' for 136 combinations
+        (128 if skip_no_marker)
+    skip_no_marker : bool, optional
+        Whether to skip marker index 0 (no symbol) for scatter plots
     """
-    use("color+marker", cycle_mode=cycle_mode)
+    use("color+marker", cycle_mode=cycle_mode, skip_no_marker=skip_no_marker)
 
 
-def all(cycle_mode: str = "default") -> None:
+def all(cycle_mode: str = "default", skip_no_marker: bool = False) -> None:
     """Apply all gnuplot styles: colors, lines, and markers.
 
     Parameters
     ----------
     cycle_mode : str, optional
         'default' for 16 combinations, 'extended' for 16 combinations (same)
+    skip_no_marker : bool, optional
+        Whether to skip marker index 0 (no symbol) for scatter plots
     """
-    use("all", cycle_mode=cycle_mode)
+    use("all", cycle_mode=cycle_mode, skip_no_marker=skip_no_marker)
