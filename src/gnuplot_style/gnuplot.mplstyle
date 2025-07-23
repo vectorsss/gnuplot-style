@@ -63,14 +63,10 @@ patch.edgecolor: black
 patch.antialiased: True
 
 # Font properties - gnuplot uses Helvetica for PostScript
-# font.serif : cmr10, Computer Modern Serif, DejaVu Serif
-font.family : serif
-# axes.formatter.use_mathtext : True
-# font.family: sans-serif
+font.family: sans-serif
 font.sans-serif: Helvetica, Arial, DejaVu Sans, Bitstream Vera Sans, sans-serif
 font.size: 10.0
-font.serif : cmr10, Computer Modern Serif, DejaVu Serif
-# font.serif: Times, DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, serif
+font.serif: Times, DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, serif
 font.monospace: Courier, DejaVu Mono, Bitstream Vera Mono, Computer Modern Typewriter, monospace
 
 # Text properties
