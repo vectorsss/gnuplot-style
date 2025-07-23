@@ -157,6 +157,34 @@ for i in range(8):
 
 Without `skip_no_marker=True`, the first dataset would be invisible because gnuplot's marker 0 is "no symbol".
 
+#### Important Note on Scatter vs Plot
+
+In matplotlib, `scatter()` and `plot()` handle markers differently:
+
+- **`plot()`** automatically uses markers from the prop_cycle
+- **`scatter()`** does NOT automatically use markers from the prop_cycle
+
+For scatter-like visualizations with automatic marker cycling from gnuplot styles:
+
+```python
+# ✅ Recommended: Use plot() with linestyle='none'
+gp.use('cm', skip_no_marker=True)  # Apply style BEFORE creating figures
+
+# Create figure AFTER applying style
+fig, ax = plt.subplots()
+for i in range(8):
+    x = np.random.normal(i, 0.3, 50)
+    y = np.random.normal(i, 0.3, 50)
+    plt.plot(x, y, linestyle='none', markersize=8)  # Markers cycle automatically
+
+# ❌ Not recommended: scatter() requires manual marker specification
+# The markers from gnuplot style won't be applied automatically
+for i in range(8):
+    plt.scatter(x, y)  # Will use default circular markers only
+```
+
+If you must use `scatter()`, you need to manually extract and apply markers from the prop_cycle.
+
 ## Development
 
 ### Setup

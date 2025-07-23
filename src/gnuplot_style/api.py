@@ -55,7 +55,8 @@ def all(cycle_mode: str = "default", skip_no_marker: bool = False) -> None:
     Parameters
     ----------
     cycle_mode : str, optional
-        'default' for 16 combinations, 'extended' for 16 combinations (same)
+        'default' for 16 combinations, 'extended' for 1224 combinations (8 × 9 × 17)
+        or 1152 if skip_no_marker (8 × 9 × 16)
     skip_no_marker : bool, optional
         Whether to skip marker index 0 (no symbol) for scatter plots
     """

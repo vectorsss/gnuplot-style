@@ -44,7 +44,8 @@ def use(
         - 'extended': Extended cycling for more combinations
           - 'cl': 72 combinations (8 colors × 9 lines)
           - 'cm': 136 combinations (8 colors × 17 markers)
-          - 'all': 16 combinations (same as default)
+          - 'all': 1224 combinations (8 colors × 9 lines × 17 markers)
+                   or 1152 if skip_no_marker (8 × 9 × 16)
     skip_no_marker : bool, optional
         Whether to skip marker index 0 (no symbol) for scatter plots (default: False)
 
@@ -141,25 +142,38 @@ def use(
         plt.rc("axes", prop_cycle=cycler(color=colors, marker=markers, fillstyle=fills))
 
     elif style == "all":
-        # All three combined - use 16 unique combinations
-        # First 8: colors 1-8 with markers 1-8 (or 1-9 if skipping no marker)
-        # Next 8: colors 1-8 with markers 9-16 (or 9-17 if skipping no marker)
+        # All three combined
         colors = []
         lines = []
         markers = []
         fills = []
 
-        # Create 16 combinations
-        start_idx = 1 if skip_no_marker else 0
-        for i in range(16):
-            color_idx = i % 8
-            line_idx = i % len(LINE_STYLES)
-            marker_idx = (i + start_idx) % len(MARKERS)
+        if cycle_mode == "extended":
+            # Extended mode: cycle through all combinations
+            # (8 colors × 9 lines × 17 markers = 1224
+            # or 8 × 9 × 16 = 1152 if skipping no marker)
+            start_idx = 1 if skip_no_marker else 0
+            for marker_idx in range(start_idx, len(MARKERS)):
+                for line_idx in range(len(LINE_STYLES)):
+                    for color_idx in range(len(COLORS)):
+                        colors.append(COLORS[color_idx])
+                        lines.append(LINE_STYLES[line_idx])
+                        markers.append(MARKERS[marker_idx])
+                        fills.append(FILL_STYLES[marker_idx])
+        else:
+            # Default: use 16 unique combinations
+            # First 8: colors 1-8 with markers 0-7 (or 1-8 if skipping no marker)
+            # Next 8: colors 1-8 with markers 8-15 (or 9-16 if skipping no marker)
+            start_idx = 1 if skip_no_marker else 0
+            for i in range(16):
+                color_idx = i % 8
+                line_idx = i % len(LINE_STYLES)
+                marker_idx = (i + start_idx) % len(MARKERS)
 
-            colors.append(COLORS[color_idx])
-            lines.append(LINE_STYLES[line_idx])
-            markers.append(MARKERS[marker_idx])
-            fills.append(FILL_STYLES[marker_idx])
+                colors.append(COLORS[color_idx])
+                lines.append(LINE_STYLES[line_idx])
+                markers.append(MARKERS[marker_idx])
+                fills.append(FILL_STYLES[marker_idx])
 
         plt.rc(
             "axes",
