@@ -14,6 +14,7 @@ A Python package that provides gnuplot-style aesthetics for matplotlib plots.
 - Modular design allowing selective application of styles
 - Compatible with matplotlib's style system
 - Includes pattern fills for histograms and bar charts
+- Smart cycling: 16 unique combinations when using all styles together
 
 ## Installation
 
@@ -106,6 +107,35 @@ Available patterns:
 - 5: Diagonal lines (-45°)
 - 6: Wide diagonal lines (45°)
 - 7: Wide diagonal lines (-45°)
+
+## Style Cycling
+
+When you have more than 8 datasets:
+
+### Default Mode
+- **Colors only** (`'c'`): Cycles through 8 colors
+- **Colors + Lines** (`'cl'`): Cycles through 8 combinations
+- **Colors + Markers** (`'cm'`): Cycles through 8 combinations
+- **All styles** (`'all'`): Cycles through **16 unique combinations**
+  - First 8: Colors 1-8 with markers 1-8
+  - Next 8: Colors 1-8 with markers 9-16
+
+### Extended Mode (NEW!)
+For even more unique combinations, use `cycle_mode='extended'`:
+
+```python
+# 72 unique combinations (8 colors × 9 line styles)
+gp.use('cl', cycle_mode='extended')
+
+# 128 unique combinations (8 colors × 16 markers)
+gp.use('cm', cycle_mode='extended')
+
+# Also works with convenience functions
+gp.colors_lines(cycle_mode='extended')
+gp.colors_markers(cycle_mode='extended')
+```
+
+Extended mode cycles through all color combinations for each line/marker style before moving to the next, providing maximum visual distinction for complex plots.
 
 ## Development
 

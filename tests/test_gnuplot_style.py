@@ -143,10 +143,93 @@ def test_generate_reference_figures():
     plt.close()
 
 
+def test_extended_cycle_mode():
+    """Test extended cycle mode functionality."""
+    # Test color+line extended mode (72 combinations)
+    gp.use("cl", cycle_mode="extended")
+    cycle = list(plt.rcParams["axes.prop_cycle"])
+    assert len(cycle) == 72  # 8 colors × 9 lines
+
+    # Test color+marker extended mode (128 combinations)
+    gp.use("cm", cycle_mode="extended")
+    cycle = list(plt.rcParams["axes.prop_cycle"])
+    assert len(cycle) == 128  # 8 colors × 16 markers
+
+    # Test that first 16 have the same marker
+    for i in range(8):
+        assert cycle[i]["marker"] == gp.MARKERS[0]
+    # Test that colors cycle within each marker group
+    for i in range(8):
+        assert cycle[i]["color"] == gp.COLORS[i]
+        assert cycle[i + 8]["color"] == gp.COLORS[i]  # Colors repeat
+        assert cycle[i + 8]["marker"] == gp.MARKERS[1]  # Different marker
+
+
+def test_default_vs_extended_visual():
+    """Visual test comparing default vs extended cycle modes."""
+    fig, axes = plt.subplots(2, 2, figsize=(14, 8))
+    fig.suptitle("Cycle Mode Comparison: Default vs Extended", fontsize=14)
+
+    x = np.linspace(0, 2 * np.pi, 30)
+    n_lines = 20
+
+    # Default color+line (top left)
+    ax = axes[0, 0]
+    gp.use("cl")  # default mode
+    ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
+    ax.set_title("Color+Line Default (8 unique)")
+    for i in range(n_lines):
+        y = np.sin(x + i * 0.2) * (0.9 - i * 0.02)
+        ax.plot(x, y, linewidth=2, label=f"{i+1}")
+    ax.legend(ncol=4, fontsize=6)
+    ax.grid(True, alpha=0.3)
+
+    # Extended color+line (top right)
+    ax = axes[0, 1]
+    gp.use("cl", cycle_mode="extended")
+    ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
+    ax.set_title("Color+Line Extended (72 unique)")
+    for i in range(n_lines):
+        y = np.sin(x + i * 0.2) * (0.9 - i * 0.02)
+        ax.plot(x, y, linewidth=2, label=f"{i+1}")
+    ax.legend(ncol=4, fontsize=6)
+    ax.grid(True, alpha=0.3)
+
+    # Default color+marker (bottom left)
+    ax = axes[1, 0]
+    gp.use("cm")  # default mode
+    ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
+    ax.set_title("Color+Marker Default (8 unique)")
+    x_sparse = x[::3]
+    for i in range(n_lines):
+        y = np.sin(x_sparse + i * 0.2) * (0.9 - i * 0.02)
+        ax.plot(x_sparse, y, linewidth=1, markersize=6, label=f"{i+1}")
+    ax.legend(ncol=4, fontsize=6)
+    ax.grid(True, alpha=0.3)
+
+    # Extended color+marker (bottom right)
+    ax = axes[1, 1]
+    gp.use("cm", cycle_mode="extended")
+    ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
+    ax.set_title("Color+Marker Extended (128 unique)")
+    for i in range(n_lines):
+        y = np.sin(x_sparse + i * 0.2) * (0.9 - i * 0.02)
+        ax.plot(x_sparse, y, linewidth=1, markersize=6, label=f"{i+1}")
+    ax.legend(ncol=4, fontsize=6)
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    output_path = os.path.join(os.path.dirname(__file__), "test_cycle_modes.png")
+    plt.savefig(output_path, dpi=100)
+    plt.close()
+
+
 if __name__ == "__main__":
     # Run visual test when executed directly
     test_generate_reference_figures()
     test_apply_style_to_existing_axes()
+    test_default_vs_extended_visual()
     print("Test figures saved:")
     print("  - test_colors_lines.png (Colors + Lines example)")
     print("  - test_prop_cycle_comparison.png (Comparison with/without prop_cycle)")
+    print("  - test_cycle_modes.png (Default vs Extended cycle modes)")

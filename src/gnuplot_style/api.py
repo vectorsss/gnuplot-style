@@ -18,16 +18,34 @@ def markers() -> None:
     use("marker")
 
 
-def colors_lines() -> None:
-    """Apply gnuplot colors and line styles."""
-    use("color+line")
+def colors_lines(cycle_mode: str = "default") -> None:
+    """Apply gnuplot colors and line styles.
+
+    Parameters
+    ----------
+    cycle_mode : str, optional
+        'default' for 8 combinations, 'extended' for 72 combinations
+    """
+    use("color+line", cycle_mode=cycle_mode)
 
 
-def colors_markers() -> None:
-    """Apply gnuplot colors and markers."""
-    use("color+marker")
+def colors_markers(cycle_mode: str = "default") -> None:
+    """Apply gnuplot colors and markers.
+
+    Parameters
+    ----------
+    cycle_mode : str, optional
+        'default' for 8 combinations, 'extended' for 128 combinations
+    """
+    use("color+marker", cycle_mode=cycle_mode)
 
 
-def all() -> None:
-    """Apply all gnuplot styles: colors, lines, and markers."""
-    use("all")
+def all(cycle_mode: str = "default") -> None:
+    """Apply all gnuplot styles: colors, lines, and markers.
+
+    Parameters
+    ----------
+    cycle_mode : str, optional
+        'default' for 16 combinations, 'extended' for 16 combinations (same)
+    """
+    use("all", cycle_mode=cycle_mode)

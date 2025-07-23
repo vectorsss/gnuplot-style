@@ -18,7 +18,9 @@ from .constants import (
 )
 
 
-def use(style: str = "color", apply_mplstyle: bool = True) -> None:
+def use(
+    style: str = "color", apply_mplstyle: bool = True, cycle_mode: str = "default"
+) -> None:
     """Apply gnuplot style with a single command.
 
     Parameters
@@ -33,6 +35,13 @@ def use(style: str = "color", apply_mplstyle: bool = True) -> None:
         - 'all' or 'clm': Colors, lines, and markers
     apply_mplstyle : bool, optional
         Whether to apply gnuplot.mplstyle settings (default: True)
+    cycle_mode : str, optional
+        Cycling mode for styles (default: 'default'):
+        - 'default': Standard cycling (8 for most, 16 for 'all')
+        - 'extended': Extended cycling for more combinations
+          - 'cl': 72 combinations (8 colors × 9 lines)
+          - 'cm': 128 combinations (8 colors × 16 markers)
+          - 'all': 16 combinations (same as default)
 
     Raises
     ------
@@ -73,36 +82,68 @@ def use(style: str = "color", apply_mplstyle: bool = True) -> None:
         )
 
     elif style == "color+line":
-        # Create paired colors and lines element-wise
-        colors = []
-        lines = []
-        for i in range(8):
-            colors.append(COLORS[i % len(COLORS)])
-            lines.append(LINE_STYLES[i % len(LINE_STYLES)])
+        # Create paired colors and lines
+        if cycle_mode == "extended":
+            # Extended mode: cycle through all combinations (8 colors × 9 lines = 72)
+            colors = []
+            lines = []
+            for line_idx in range(len(LINE_STYLES)):
+                for color_idx in range(len(COLORS)):
+                    colors.append(COLORS[color_idx])
+                    lines.append(LINE_STYLES[line_idx])
+        else:
+            # Default: element-wise pairing (8 combinations)
+            colors = []
+            lines = []
+            for i in range(8):
+                colors.append(COLORS[i % len(COLORS)])
+                lines.append(LINE_STYLES[i % len(LINE_STYLES)])
         plt.rc("axes", prop_cycle=cycler(color=colors, linestyle=lines))
 
     elif style == "color+marker":
-        # Create paired colors and markers element-wise
-        colors = []
-        markers = []
-        fills = []
-        for i in range(8):
-            colors.append(COLORS[i % len(COLORS)])
-            markers.append(MARKERS[i % len(MARKERS)])
-            fills.append(FILL_STYLES[i % len(FILL_STYLES)])
+        # Create paired colors and markers
+        if cycle_mode == "extended":
+            # Extended mode: cycle through all combinations
+            # (8 colors × 16 markers = 128)
+            colors = []
+            markers = []
+            fills = []
+            for marker_idx in range(len(MARKERS)):
+                for color_idx in range(len(COLORS)):
+                    colors.append(COLORS[color_idx])
+                    markers.append(MARKERS[marker_idx])
+                    fills.append(FILL_STYLES[marker_idx])
+        else:
+            # Default: element-wise pairing (8 combinations)
+            colors = []
+            markers = []
+            fills = []
+            for i in range(8):
+                colors.append(COLORS[i % len(COLORS)])
+                markers.append(MARKERS[i % len(MARKERS)])
+                fills.append(FILL_STYLES[i % len(FILL_STYLES)])
         plt.rc("axes", prop_cycle=cycler(color=colors, marker=markers, fillstyle=fills))
 
     elif style == "all":
-        # All three combined element-wise
+        # All three combined - use 16 unique combinations
+        # First 8: colors 1-8 with markers 1-8
+        # Next 8: colors 1-8 with markers 9-16
         colors = []
         lines = []
         markers = []
         fills = []
-        for i in range(8):
-            colors.append(COLORS[i % len(COLORS)])
-            lines.append(LINE_STYLES[i % len(LINE_STYLES)])
-            markers.append(MARKERS[i % len(MARKERS)])
-            fills.append(FILL_STYLES[i % len(FILL_STYLES)])
+
+        # Create 16 combinations
+        for i in range(16):
+            color_idx = i % 8
+            line_idx = i % len(LINE_STYLES)
+            marker_idx = i % len(MARKERS)
+
+            colors.append(COLORS[color_idx])
+            lines.append(LINE_STYLES[line_idx])
+            markers.append(MARKERS[marker_idx])
+            fills.append(FILL_STYLES[marker_idx])
+
         plt.rc(
             "axes",
             prop_cycle=cycler(
