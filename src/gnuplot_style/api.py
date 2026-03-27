@@ -49,15 +49,28 @@ def colors_markers(cycle_mode: str = "default", skip_no_marker: bool = False) ->
     use("color+marker", cycle_mode=cycle_mode, skip_no_marker=skip_no_marker)
 
 
-def all(cycle_mode: str = "default", skip_no_marker: bool = False) -> None:
+def all(
+    cycle_mode: str = "default",
+    skip_no_marker: bool = False,
+    loop_order: str = "mlc",
+) -> None:
     """Apply all gnuplot styles: colors, lines, and markers.
 
     Parameters
     ----------
     cycle_mode : str, optional
-        'default' for 16 combinations, 'extended' for 1224 combinations (8 × 9 × 17)
-        or 1152 if skip_no_marker (8 × 9 × 16)
+        'default' for 16 combinations, 'extended' for full Cartesian product
+        (1224 combos), 'zip' for simultaneous cycling of all three properties
+        (1224 combos, or 144 if skip_no_marker)
     skip_no_marker : bool, optional
         Whether to skip marker index 0 (no symbol) for scatter plots
+    loop_order : str, optional
+        Loop order for extended mode, outermost to innermost (e.g. 'mlc', 'clm').
+        Only used when cycle_mode='extended'.
     """
-    use("all", cycle_mode=cycle_mode, skip_no_marker=skip_no_marker)
+    use(
+        "all",
+        cycle_mode=cycle_mode,
+        skip_no_marker=skip_no_marker,
+        loop_order=loop_order,
+    )

@@ -193,6 +193,42 @@ def test_skip_no_marker():
     assert cycle[0]["marker"] == gp.MARKERS[1]  # Should start with dot
 
 
+def test_zip_cycle_mode():
+    """Test zip cycle mode: all three properties advance simultaneously."""
+    from math import gcd
+
+    # Basic length: lcm(8, 9, 17) = 1224
+    gp.use("all", cycle_mode="zip")
+    cycle = list(plt.rcParams["axes.prop_cycle"])
+    assert len(cycle) == 1224
+
+    # Every step all three properties change
+    for i in range(len(gp.COLORS)):
+        assert cycle[i]["color"] == gp.COLORS[i]
+        assert cycle[i]["linestyle"] == gp.LINE_STYLES[i]
+        assert cycle[i]["marker"] == gp.MARKERS[i]
+
+    # Color wraps at 8, line at 9, marker at 17
+    assert cycle[8]["color"] == gp.COLORS[0]  # color wrapped
+    assert cycle[8]["linestyle"] == gp.LINE_STYLES[8]  # line not yet wrapped
+    assert cycle[9]["linestyle"] == gp.LINE_STYLES[0]  # line wrapped
+    assert cycle[17]["marker"] == gp.MARKERS[0]  # marker wrapped
+
+    # skip_no_marker: lcm(8, 9, 16) = 144
+    gp.use("all", cycle_mode="zip", skip_no_marker=True)
+    cycle = list(plt.rcParams["axes.prop_cycle"])
+    n_markers = len(gp.MARKERS) - 1  # 16
+    n = len(gp.COLORS)
+    n = n * len(gp.LINE_STYLES) // gcd(n, len(gp.LINE_STYLES))
+    n = n * n_markers // gcd(n, n_markers)
+    assert len(cycle) == n
+    assert cycle[0]["marker"] == gp.MARKERS[1]  # starts from dot, not space
+
+    # Invalid loop_order still raises for extended mode
+    with pytest.raises(ValueError):
+        gp.use("all", cycle_mode="extended", loop_order="xyz")
+
+
 def test_default_vs_extended_visual():
     """Visual test comparing default vs extended cycle modes."""
     fig, axes = plt.subplots(2, 2, figsize=(14, 8))
@@ -252,12 +288,73 @@ def test_default_vs_extended_visual():
     plt.close()
 
 
+def test_zip_cycle_mode_visual():
+    """Visual test comparing extended vs zip cycle modes for 'all' style."""
+    fig, axes = plt.subplots(2, 2, figsize=(14, 8))
+    fig.suptitle("Cycle Mode Comparison: Extended vs Zip (all style)", fontsize=14)
+
+    x = np.linspace(0, 2 * np.pi, 30)
+    x_sparse = x[::3]
+    n_lines = 20
+
+    # Extended all (top left) — color repeats 8 times before anything else changes
+    ax = axes[0, 0]
+    gp.use("all", cycle_mode="extended")
+    ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
+    ax.set_title("All Extended (Cartesian, color cycles first)")
+    for i in range(n_lines):
+        y = np.sin(x_sparse + i * 0.2) * (0.9 - i * 0.02)
+        ax.plot(x_sparse, y, linewidth=1.5, markersize=6, label=f"{i+1}")
+    ax.legend(ncol=4, fontsize=6)
+    ax.grid(True, alpha=0.3)
+
+    # Zip all (top right) — color, line, marker all change every step
+    ax = axes[0, 1]
+    gp.use("all", cycle_mode="zip")
+    ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
+    ax.set_title("All Zip (simultaneous, all change each step)")
+    for i in range(n_lines):
+        y = np.sin(x_sparse + i * 0.2) * (0.9 - i * 0.02)
+        ax.plot(x_sparse, y, linewidth=1.5, markersize=6, label=f"{i+1}")
+    ax.legend(ncol=4, fontsize=6)
+    ax.grid(True, alpha=0.3)
+
+    # Zip skip_no_marker=False (bottom left)
+    ax = axes[1, 0]
+    gp.use("all", cycle_mode="zip", skip_no_marker=False)
+    ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
+    ax.set_title("All Zip (with no-symbol marker, series 1 invisible)")
+    for i in range(n_lines):
+        y = np.sin(x_sparse + i * 0.2) * (0.9 - i * 0.02)
+        ax.plot(x_sparse, y, linewidth=1.5, markersize=6, label=f"{i+1}")
+    ax.legend(ncol=4, fontsize=6)
+    ax.grid(True, alpha=0.3)
+
+    # Zip skip_no_marker=True (bottom right)
+    ax = axes[1, 1]
+    gp.use("all", cycle_mode="zip", skip_no_marker=True)
+    ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
+    ax.set_title("All Zip + skip_no_marker (all series visible)")
+    for i in range(n_lines):
+        y = np.sin(x_sparse + i * 0.2) * (0.9 - i * 0.02)
+        ax.plot(x_sparse, y, linewidth=1.5, markersize=6, label=f"{i+1}")
+    ax.legend(ncol=4, fontsize=6)
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    output_path = os.path.join(os.path.dirname(__file__), "test_zip_cycle_mode.png")
+    plt.savefig(output_path, dpi=100)
+    plt.close()
+
+
 if __name__ == "__main__":
     # Run visual test when executed directly
     test_generate_reference_figures()
     test_apply_style_to_existing_axes()
     test_default_vs_extended_visual()
+    test_zip_cycle_mode_visual()
     print("Test figures saved:")
     print("  - test_colors_lines.png (Colors + Lines example)")
     print("  - test_prop_cycle_comparison.png (Comparison with/without prop_cycle)")
     print("  - test_cycle_modes.png (Default vs Extended cycle modes)")
+    print("  - test_zip_cycle_mode.png (Extended vs Zip cycle modes)")

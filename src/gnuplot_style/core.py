@@ -1,6 +1,8 @@
 """Core functionality for gnuplot style."""
 
+import itertools
 import os
+from math import gcd
 from typing import Any, List, Union
 
 import matplotlib as mpl
@@ -23,6 +25,7 @@ def use(
     apply_mplstyle: bool = True,
     cycle_mode: str = "default",
     skip_no_marker: bool = False,
+    loop_order: str = "mlc",
 ) -> None:
     """Apply gnuplot style with a single command.
 
@@ -41,13 +44,23 @@ def use(
     cycle_mode : str, optional
         Cycling mode for styles (default: 'default'):
         - 'default': Standard cycling (8 for most, 16 for 'all')
-        - 'extended': Extended cycling for more combinations
+        - 'extended': Cartesian product — all combinations via nested loops
           - 'cl': 72 combinations (8 colors × 9 lines)
           - 'cm': 136 combinations (8 colors × 17 markers)
           - 'all': 1224 combinations (8 colors × 9 lines × 17 markers)
                    or 1152 if skip_no_marker (8 × 9 × 16)
+        - 'zip': All three properties advance simultaneously (wrap independently).
+          Each step increments color, line, and marker together.
+          - 'all': lcm(8, 9, 17) = 1224 unique combos (or lcm(8, 9, 16) = 144
+                   if skip_no_marker)
     skip_no_marker : bool, optional
         Whether to skip marker index 0 (no symbol) for scatter plots (default: False)
+    loop_order : str, optional
+        Loop order for extended 'all' mode, as a 3-character string of 'c', 'l', 'm'
+        from outermost (slowest-changing) to innermost (fastest-changing).
+        Default 'mlc': marker changes slowest, then line, color changes fastest.
+        Examples: 'clm' (color slowest), 'lmc' (line slowest).
+        Only used when style='all' and cycle_mode='extended'.
 
     Raises
     ------
@@ -153,13 +166,39 @@ def use(
             # (8 colors × 9 lines × 17 markers = 1224
             # or 8 × 9 × 16 = 1152 if skipping no marker)
             start_idx = 1 if skip_no_marker else 0
-            for marker_idx in range(start_idx, len(MARKERS)):
-                for line_idx in range(len(LINE_STYLES)):
-                    for color_idx in range(len(COLORS)):
-                        colors.append(COLORS[color_idx])
-                        lines.append(LINE_STYLES[line_idx])
-                        markers.append(MARKERS[marker_idx])
-                        fills.append(FILL_STYLES[marker_idx])
+            if set(loop_order) != {"c", "l", "m"} or len(loop_order) != 3:
+                raise ValueError(
+                    f"loop_order must be a permutation of 'c', 'l', 'm', \
+                    got '{loop_order}'"
+                )
+            ranges = {
+                "c": range(len(COLORS)),
+                "l": range(len(LINE_STYLES)),
+                "m": range(start_idx, len(MARKERS)),
+            }
+            for indices in itertools.product(*[ranges[k] for k in loop_order]):
+                idx = dict(zip(loop_order, indices))
+                colors.append(COLORS[idx["c"]])
+                lines.append(LINE_STYLES[idx["l"]])
+                markers.append(MARKERS[idx["m"]])
+                fills.append(FILL_STYLES[idx["m"]])
+        elif cycle_mode == "zip":
+            # Zip mode: all three properties advance simultaneously.
+            # Each step increments color, linestyle, and marker together,
+            # wrapping each independently.
+            # Cycle length = lcm(n_colors, n_lines, n_markers).
+            start_idx = 1 if skip_no_marker else 0
+            n_markers = len(MARKERS) - start_idx
+            n = len(COLORS)
+            n = n * len(LINE_STYLES) // gcd(n, len(LINE_STYLES))
+            n = n * n_markers // gcd(n, n_markers)
+            for i in range(n):
+                marker_idx = start_idx + (i % n_markers)
+                colors.append(COLORS[i % len(COLORS)])
+                lines.append(LINE_STYLES[i % len(LINE_STYLES)])
+                markers.append(MARKERS[marker_idx])
+                fills.append(FILL_STYLES[marker_idx])
+
         else:
             # Default: use 16 unique combinations
             # First 8: colors 1-8 with markers 0-7 (or 1-8 if skipping no marker)
