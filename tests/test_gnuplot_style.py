@@ -3,6 +3,8 @@
 import os
 import sys
 
+os.environ.setdefault("MPLBACKEND", "Agg")
+
 # Add src directory to path to import gnuplot_style
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
